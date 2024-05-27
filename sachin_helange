@@ -1,0 +1,95 @@
+import subprocess
+import datetime
+
+# Configurations
+SOURCE_DIRECTORY = "/path/to/source/directory"
+DESTINATION_USER = "remote_user"
+DESTINATION_SERVER = "remote.server.com"
+DESTINATION_DIRECTORY = "/path/to/backup/directory"
+LOG_FILE = "/var/log/backup.log"
+
+
+def log_message(message):
+    with open(LOG_FILE, "a") as log_file:
+        log_file.write(f"{datetime.datetime.now()} - {message}\n")
+
+
+def perform_backup():
+    rsync_command = [
+        "rsync",
+        "-avz",
+        "--delete",
+        SOURCE_DIRECTORY,
+        f"{DESTINATION_USER}@{DESTINATION_SERVER}:{DESTINATION_DIRECTORY}"
+    ]
+
+    result = subprocess.run(rsync_command, capture_output=True, text=True)
+
+    with open(LOG_FILE, "a") as log_file:
+        log_file.write(result.stdout)
+        log_file.write(result.stderr)
+
+    if result.returncode == 0:
+        log_message("Backup successful")
+    else:
+        log_message("Backup failed")
+
+
+if __name__ == "__main__":
+    perform_backup()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+----------------------------------------------------------------------------------------------------------
+
+
+
+
+
+import psutil
+import time
+
+# Define thresholds
+CPU_THRESHOLD = 80.0
+MEMORY_THRESHOLD = 80.0
+DISK_THRESHOLD = 80.0
+
+def check_system_health():
+    cpu_usage = psutil.cpu_percent(interval=1)
+    memory_info = psutil.virtual_memory()
+    disk_info = psutil.disk_usage('/')
+
+    alerts = []
+
+    if cpu_usage > CPU_THRESHOLD:
+        alerts.append(f"High CPU usage detected: {cpu_usage}%")
+
+    if memory_info.percent > MEMORY_THRESHOLD:
+        alerts.append(f"High memory usage detected: {memory_info.percent}%")
+
+    if disk_info.percent > DISK_THRESHOLD:
+        alerts.append(f"High disk usage detected: {disk_info.percent}%")
+
+    if alerts:
+        with open("system_health.log", "a") as log_file:
+            for alert in alerts:
+                log_file.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - {alert}\n")
+                print(alert)
+
+if __name__ == "__main__":
+    while True:
+        check_system_health()
+        time.sleep(60)
